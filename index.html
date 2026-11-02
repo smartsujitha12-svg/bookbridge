@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookBridge – Connect Readers, Authors & Sellers</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        bookslate: {
+                            50: '#f4f6f9',
+                            100: '#e5eaf2',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        bookgold: {
+                            500: '#d97706',
+                            600: '#b45309',
+                            400: '#fbbf24'
+                        },
+                        bookcream: '#fcfbfa'
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fcfbfa; color: #1e293b; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
+
+    <!-- Top Announcement Bar -->
+    <div class="bg-bookslate-900 text-amber-200 text-xs sm:text-sm py-2 px-4 text-center font-medium flex items-center justify-center gap-3">
+        <span><i class="fa-solid fa-truck-fast mr-2"></i> Free Worldwide Shipping on Orders Over ₹750 / $25!</span>
+        <span class="hidden md:inline bg-amber-600/30 text-amber-300 text-xs px-2 py-0.5 rounded-full border border-amber-500/30">Use Code: <strong>BRIDGE20</strong> for 20% OFF</span>
+    </div>
+
+    <!-- Main Sticky Navbar -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-bookslate-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            
+            <!-- Logo -->
+            <a href="#" onclick="switchTab('home')" class="flex items-center gap-2 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-bookslate-900 to-amber-700 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-book-open-reader text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-2xl font-black font-serif tracking-tight text-bookslate-900">Book<span class="text-amber-600">Bridge</span></span>
+                    <span class="block text-[10px] tracking-widest uppercase text-slate-500 font-semibold -mt-1">Readers • Authors • Sellers</span>
+                </div>
+            </a>
+
+            <!-- Search Bar (Desktop) -->
+            <div class="hidden md:flex flex-1 max-w-md relative">
+                <input type="text" id="mainSearchInput" oninput="handleSearchInput(event)" placeholder="Search across 39 titles, authors, genres or Tamil classics..." class="w-full bg-bookslate-50 border border-slate-200 rounded-full pl-11 pr-4 py-2.5 text-sm focus:outline-none focus:border-amber-600 focus:bg-white transition-all shadow-inner">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400"></i>
+                <div id="searchSuggestions" class="absolute top-12 left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl hidden z-50 max-h-80 overflow-y-auto p-2"></div>
+            </div>
+
+            <!-- Nav Actions -->
+            <div class="flex items-center gap-3 sm:gap-4">
+                <button onclick="switchTab('finder')" class="hidden lg:flex items-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-900 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-amber-200 transition-all shadow-sm">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-600"></i> Smart Finder
+                </button>
+
+                <!-- Wishlist Trigger -->
+                <button onclick="openWishlistModal()" class="relative p-2.5 rounded-xl hover:bg-slate-100 text-slate-700 transition-all">
+                    <i class="fa-regular fa-heart text-xl"></i>
+                    <span id="wishlistBadge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md hidden">0</span>
+                </button>
+
+                <!-- Cart Trigger -->
+                <button onclick="openCartDrawer()" class="relative flex items-center gap-2 bg-bookslate-900 hover:bg-bookslate-800 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-md group">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span class="hidden sm:inline">Cart</span>
+                    <span id="cartBadge" class="bg-amber-500 text-bookslate-900 text-xs font-black px-2 py-0.5 rounded-full shadow-inner">0</span>
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2.5 rounded-xl hover:bg-slate-100 text-slate-700">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs Bar -->
+        <div class="bg-bookslate-50 border-t border-slate-100 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto flex items-center justify-between overflow-x-auto py-2.5 scrollbar-none">
+                <div class="flex items-center gap-1 sm:gap-2 min-w-max text-sm font-medium">
+                    <button onclick="switchTab('home')" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-amber-600 hover:bg-white transition-all active-tab" data-tab="home">
+                        <i class="fa-solid fa-house mr-1.5"></i> Home
+                    </button>
+                    <button onclick="switchTab('catalog'); filterCatalog('All');" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-amber-600 hover:bg-white transition-all" data-tab="catalog">
+                        <i class="fa-solid fa-book mr-1.5"></i> All Books
+                    </button>
+                    <button onclick="switchTab('catalog'); filterCatalog('Fiction');" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-amber-600 hover:bg-white transition-all" data-tab="catalog">
+                        <i class="fa-solid fa-feather mr-1.5"></i> Fiction & Classics
+                    </button>
+                    <button onclick="switchTab('catalog'); filterCatalog('Educational');" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-amber-600 hover:bg-white transition-all" data-tab="catalog">
+                        <i class="fa-solid fa-graduation-cap mr-1.5"></i> Educational & Tech
+                    </button>
+                    <button onclick="switchTab('catalog'); filterCatalog('Children');" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-amber-600 hover:bg-white transition-all" data-tab="catalog">
+                        <i class="fa-solid fa-child-reaching mr-1.5"></i> Children's
+                    </button>
+                    <button onclick="switchTab('catalog'); filterCatalog('Tamil Books');" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-amber-600 hover:bg-white transition-all text-amber-700 font-bold" data-tab="catalog">
+                        <i class="fa-solid fa-om mr-1.5"></i> Tamil Books (தமிழ்)
+                    </button>
+                    <button onclick="switchTab('finder')" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-amber-600 hover:bg-white transition-all lg:hidden" data-tab="finder">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-amber-600"></i> Smart Finder
+                    </button>
+                    <button onclick="switchTab('sell')" class="nav-tab px-3.5 py-1.5 rounded-lg text-slate-700 hover:text-amber-600 hover:bg-white transition-all" data-tab="sell">
+                        <i class="fa-solid fa-store mr-1.5"></i> Author & Seller Portal
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-b border-slate-200 px-6 py-4 space-y-4 shadow-lg fade-in">
+            <div class="relative">
+                <input type="text" id="mobileSearchInput" oninput="handleSearchInput(event)" placeholder="Search books..." class="w-full bg-slate-100 border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 text-sm focus:outline-none">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400"></i>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-sm font-medium">
+                <button onclick="switchTab('home'); toggleMobileMenu();" class="p-2.5 bg-slate-50 rounded-xl text-left"><i class="fa-solid fa-house mr-2 text-amber-600"></i> Home</button>
+                <button onclick="switchTab('catalog'); filterCatalog('All'); toggleMobileMenu();" class="p-2.5 bg-slate-50 rounded-xl text-left"><i class="fa-solid fa-book mr-2 text-amber-600"></i> All Books</button>
+                <button onclick="switchTab('catalog'); filterCatalog('Tamil Books'); toggleMobileMenu();" class="p-2.5 bg-slate-50 rounded-xl text-left"><i class="fa-solid fa-om mr-2 text-amber-600"></i> Tamil Books</button>
+                <button onclick="switchTab('finder'); toggleMobileMenu();" class="p-2.5 bg-slate-50 rounded-xl text-left"><i class="fa-solid fa-wand-magic-sparkles mr-2 text-amber-600"></i> Smart Finder</button>
+                <button onclick="switchTab('sell'); toggleMobileMenu();" class="p-2.5 bg-slate-50 rounded-xl text-left col-span-2"><i class="fa-solid fa-store mr-2 text-amber-600"></i> Author / Seller Portal</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1">
+
+        <!-- ================= HOME VIEW ================= -->
+        <div id="view-home" class="view-section space-y-16 pb-20">
+            <!-- Hero Banner -->
+            <section class="relative bg-gradient-to-r from-bookslate-900 via-slate-900 to-amber-950 text-white overflow-hidden py-20 lg:py-28 px-4 sm:px-6 lg:px-8">
+                <div class="absolute inset-0 opacity-15 bg-[radial-gradient(#fbbf24_1px,transparent_1px)] [background-size:24px_24px]"></div>
+                <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+                    <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                        <div class="inline-flex items-center gap-2 bg-amber-500/20 border border-amber-500/40 text-amber-300 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase">
+                            <i class="fa-solid fa-award"></i> Expanded 39-Title Literary Catalog
+                        </div>
+                        <h1 class="text-4xl sm:text-6xl font-black font-serif tracking-tight leading-tight">
+                            Where Readers, Authors & <span class="text-amber-400 italic">Sellers Connect.</span>
+                        </h1>
+                        <p class="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
+                            Discover bestsellers, sci-fi epics, technical masterclasses, biographies, and immortal Tamil classics. Empower independent creators with every purchase.
+                        </p>
+                        <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
+                            <button onclick="switchTab('catalog')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-8 py-4 rounded-2xl shadow-lg hover:shadow-amber-600/30 transition-all flex items-center gap-3 text-base">
+                                <i class="fa-solid fa-compass"></i> Explore Catalog (39 Books)
+                            </button>
+                            <button onclick="switchTab('finder')" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-7 py-4 rounded-2xl transition-all flex items-center gap-3 text-base backdrop-blur-md">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Smart Book Finder
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Hero Visual Card Stack -->
+                    <div class="lg:col-span-5 flex justify-center">
+                        <div class="relative w-full max-w-md aspect-[4/5] bg-gradient-to-br from-amber-600/30 to-bookslate-800 rounded-3xl p-6 shadow-2xl border border-white/10 flex flex-col justify-between overflow-hidden group">
+                            <div class="absolute -right-12 -top-12 w-48 h-48 bg-amber-500/20 rounded-full blur-2xl"></div>
+                            <div class="flex justify-between items-center z-10">
+                                <span class="bg-black/40 text-amber-300 text-xs font-bold px-3 py-1 rounded-lg backdrop-blur-md">Featured Masterpiece</span>
+                                <span class="bg-amber-500 text-bookslate-900 text-xs font-extrabold px-2.5 py-1 rounded-lg">Bestseller</span>
+                            </div>
+                            <div class="my-auto z-10 flex flex-col items-center text-center">
+                                <div class="w-48 h-64 rounded-2xl shadow-2xl overflow-hidden mb-6 border-2 border-white/20 transform group-hover:scale-105 transition-transform duration-500">
+                                    <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop" alt="Book Cover" class="w-full h-full object-cover">
+                                </div>
+                                <h3 class="text-xl font-bold font-serif text-white">Ponniyin Selvan (Part 1)</h3>
+                                <p class="text-amber-300 text-sm font-medium">Kalki Krishnamurthy</p>
+                                <div class="flex items-center gap-1 text-amber-400 text-xs mt-2">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                    <span class="text-white ml-1 font-bold">(4.9)</span>
+                                </div>
+                            </div>
+                            <div class="z-10 flex items-center justify-between bg-black/40 p-3 rounded-2xl backdrop-blur-md">
+                                <div>
+                                    <span class="text-xs text-slate-400 block">Special Price</span>
+                                    <span class="text-lg font-bold text-amber-300">₹450 <span class="text-xs line-through text-slate-400 font-normal">₹600</span></span>
+                                </div>
+                                <button onclick="quickAdd('book-tamil-1')" class="bg-amber-500 hover:bg-amber-400 text-bookslate-900 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md">
+                                    <i class="fa-solid fa-cart-plus mr-1"></i> Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Category Quick Cards -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-2xl mx-auto mb-10">
+                    <h2 class="text-3xl font-black font-serif text-bookslate-900">Explore by Category</h2>
+                    <p class="text-slate-600 text-sm mt-2">Browse handpicked collections suited for every kind of reader and academic scholar.</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div onclick="switchTab('catalog'); filterCatalog('Fiction');" class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-amber-500 transition-all cursor-pointer group text-center space-y-4">
+                        <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto text-2xl group-hover:bg-amber-600 group-hover:text-white transition-all shadow-inner">
+                            <i class="fa-solid fa-feather"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-bookslate-900 text-lg group-hover:text-amber-600 transition-colors">Fiction & Classics</h3>
+                            <p class="text-xs text-slate-500 mt-1">Sci-Fi, Dystopian & Novels</p>
+                        </div>
+                    </div>
+                    <div onclick="switchTab('catalog'); filterCatalog('Educational');" class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-amber-500 transition-all cursor-pointer group text-center space-y-4">
+                        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto text-2xl group-hover:bg-blue-600 group-hover:text-white transition-all shadow-inner">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-bookslate-900 text-lg group-hover:text-blue-600 transition-colors">Educational & Tech</h3>
+                            <p class="text-xs text-slate-500 mt-1">CS, Biographies & Science</p>
+                        </div>
+                    </div>
+                    <div onclick="switchTab('catalog'); filterCatalog('Children');" class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-amber-500 transition-all cursor-pointer group text-center space-y-4">
+                        <div class="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-2xl group-hover:bg-rose-600 group-hover:text-white transition-all shadow-inner">
+                            <i class="fa-solid fa-child-reaching"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-bookslate-900 text-lg group-hover:text-rose-600 transition-colors">Children's</h3>
+                            <p class="text-xs text-slate-500 mt-1">Storybooks, Fantasy & Morals</p>
+                        </div>
+                    </div>
+                    <div onclick="switchTab('catalog'); filterCatalog('Tamil Books');" class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-amber-500 transition-all cursor-pointer group text-center space-y-4">
+                        <div class="w-14 h-14 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto text-2xl group-hover:bg-amber-700 group-hover:text-white transition-all shadow-inner">
+                            <i class="fa-solid fa-om"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-bookslate-900 text-lg group-hover:text-amber-700 transition-colors">Tamil Books</h3>
+                            <p class="text-xs text-slate-500 mt-1">Thirukkural, Epics & Classics</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Bestsellers Grid -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-8 gap-4">
+                    <div>
+                        <span class="text-amber-600 font-bold text-xs uppercase tracking-widest">Handpicked Selections</span>
+                        <h2 class="text-3xl font-black font-serif text-bookslate-900 mt-1">Trending Bestsellers</h2>
+                    </div>
+                    <button onclick="switchTab('catalog')" class="text-amber-700 font-bold hover:text-amber-800 text-sm flex items-center gap-2 group">
+                        View Complete Catalog <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+                <div id="homeFeaturedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Populated via JavaScript -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= CATALOG VIEW ================= -->
+        <div id="view-catalog" class="view-section hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-black font-serif text-bookslate-900">Book Catalog & Marketplace</h1>
+                    <p class="text-sm text-slate-600 mt-1">Explore our comprehensive library of 39 books across fiction, educational materials, and Tamil literature.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sort By:</span>
+                    <select id="sortSelect" onchange="handleSortChange(this.value)" class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-bookslate-900 focus:outline-none focus:border-amber-600">
+                        <option value="featured">Featured Selections</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="rating">Highest Rated</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Sidebar Filters -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                            <h3 class="font-bold text-bookslate-900 text-base"><i class="fa-solid fa-filter mr-2 text-amber-600"></i> Filters</h3>
+                            <button onclick="resetFilters()" class="text-xs text-amber-600 font-bold hover:underline">Reset All</button>
+                        </div>
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Categories</h4>
+                            <div id="categoryFilterList" class="space-y-2 text-sm font-medium">
+                                <button onclick="filterCatalog('All')" class="category-btn w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-700 transition-all flex items-center justify-between active-cat" data-cat="All">
+                                    <span>All Books</span> <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-full text-slate-600" id="count-all">0</span>
+                                </button>
+                                <button onclick="filterCatalog('Fiction')" class="category-btn w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-700 transition-all flex items-center justify-between" data-cat="Fiction">
+                                    <span>Fiction & Classics</span> <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-full text-slate-600" id="count-fiction">0</span>
+                                </button>
+                                <button onclick="filterCatalog('Educational')" class="category-btn w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-700 transition-all flex items-center justify-between" data-cat="Educational">
+                                    <span>Educational & Tech</span> <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-full text-slate-600" id="count-educational">0</span>
+                                </button>
+                                <button onclick="filterCatalog('Children')" class="category-btn w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-700 transition-all flex items-center justify-between" data-cat="Children">
+                                    <span>Children's</span> <span class="text-xs bg-slate-100 px-2 py-0.5 rounded-full text-slate-600" id="count-children">0</span>
+                                </button>
+                                <button onclick="filterCatalog('Tamil Books')" class="category-btn w-full text-left px-3 py-2 rounded-xl hover:bg-amber-50 text-amber-900 transition-all flex items-center justify-between font-bold" data-cat="Tamil Books">
+                                    <span>Tamil Books (தமிழ்)</span> <span class="text-xs bg-amber-100 px-2 py-0.5 rounded-full text-amber-800" id="count-tamil">0</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Price Range Filter -->
+                        <div class="space-y-3 pt-4 border-t border-slate-100">
+                            <div class="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <span>Max Price</span>
+                                <span id="priceOutput" class="text-amber-600 font-extrabold text-sm">₹1500</span>
+                            </div>
+                            <input type="range" id="priceRange" min="200" max="1500" step="50" value="1500" oninput="handlePriceFilter(this.value)" class="w-full accent-amber-600 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Book Grid Area -->
+                <div class="lg:col-span-3 space-y-6">
+                    <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Populated via JavaScript -->
+                    </div>
+                    <div id="noResults" class="hidden text-center py-20 bg-white rounded-3xl border border-slate-200">
+                        <i class="fa-solid fa-book-skull text-4xl text-slate-400 mb-3"></i>
+                        <h3 class="text-lg font-bold text-bookslate-900">No books found matching your criteria</h3>
+                        <p class="text-sm text-slate-500 mt-1">Try adjusting your filters or search terms.</p>
+                        <button onclick="resetFilters()" class="mt-4 bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-amber-500 transition-all">Clear Filters</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SMART BOOK FINDER VIEW ================= -->
+        <div id="view-finder" class="view-section hidden max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+            <div class="text-center space-y-3">
+                <div class="inline-flex items-center gap-2 bg-amber-100 text-amber-800 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-600"></i> Interactive Recommendation Engine
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black font-serif text-bookslate-900">Smart Book Finder Wizard</h1>
+                <p class="text-slate-600 text-sm sm:text-base max-w-xl mx-auto">Select your preferences below and let our algorithm handpick ideal reads from our 39-title catalog.</p>
+            </div>
+
+            <div class="bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-xl space-y-8">
+                <div class="space-y-4">
+                    <label class="block text-sm font-bold text-bookslate-900 uppercase tracking-wider">1. Select Preferred Genre / Category</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <button onclick="setFinderParam('genre', 'Fiction')" class="finder-genre-btn p-4 rounded-2xl border-2 border-slate-200 text-center hover:border-amber-600 hover:bg-amber-50 transition-all font-semibold text-sm text-slate-700 active-finder-genre" data-genre="Fiction">
+                            <i class="fa-solid fa-feather text-amber-600 text-xl block mb-2"></i> Fiction
+                        </button>
+                        <button onclick="setFinderParam('genre', 'Educational')" class="finder-genre-btn p-4 rounded-2xl border-2 border-slate-200 text-center hover:border-amber-600 hover:bg-amber-50 transition-all font-semibold text-sm text-slate-700" data-genre="Educational">
+                            <i class="fa-solid fa-graduation-cap text-blue-600 text-xl block mb-2"></i> Educational
+                        </button>
+                        <button onclick="setFinderParam('genre', 'Children')" class="finder-genre-btn p-4 rounded-2xl border-2 border-slate-200 text-center hover:border-amber-600 hover:bg-amber-50 transition-all font-semibold text-sm text-slate-700" data-genre="Children">
+                            <i class="fa-solid fa-child-reaching text-rose-600 text-xl block mb-2"></i> Children's
+                        </button>
+                        <button onclick="setFinderParam('genre', 'Tamil Books')" class="finder-genre-btn p-4 rounded-2xl border-2 border-slate-200 text-center hover:border-amber-600 hover:bg-amber-50 transition-all font-semibold text-sm text-slate-700" data-genre="Tamil Books">
+                            <i class="fa-solid fa-om text-amber-700 text-xl block mb-2"></i> Tamil Books
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="block text-sm font-bold text-bookslate-900 uppercase tracking-wider">2. Select Your Maximum Budget</label>
+                    <div class="grid grid-cols-3 gap-4">
+                        <button onclick="setFinderParam('budget', 350)" class="finder-budget-btn p-4 rounded-2xl border-2 border-slate-200 text-center hover:border-amber-600 hover:bg-amber-50 transition-all font-bold text-sm text-slate-700" data-budget="350">
+                            Under ₹350
+                        </button>
+                        <button onclick="setFinderParam('budget', 600)" class="finder-budget-btn p-4 rounded-2xl border-2 border-slate-200 text-center hover:border-amber-600 hover:bg-amber-50 transition-all font-bold text-sm text-slate-700 active-finder-budget" data-budget="600">
+                            Under ₹600
+                        </button>
+                        <button onclick="setFinderParam('budget', 1500)" class="finder-budget-btn p-4 rounded-2xl border-2 border-slate-200 text-center hover:border-amber-600 hover:bg-amber-50 transition-all font-bold text-sm text-slate-700" data-budget="1500">
+                            No Limit / Premium
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="runSmartFinder()" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-black py-4 rounded-2xl shadow-xl transition-all text-base flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-sparkles text-xl"></i> Generate Personalized Recommendations
+                </button>
+            </div>
+
+            <div id="finderResultsArea" class="hidden space-y-6 fade-in">
+                <div class="bg-amber-50 border border-amber-200 p-6 rounded-3xl flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-amber-900 font-serif">Your Curated Recommendations</h3>
+                        <p class="text-xs text-amber-700 mt-0.5">Matched precisely against your genre and budget.</p>
+                    </div>
+                    <button onclick="resetFinder()" class="text-xs font-bold text-amber-800 underline">Start Over</button>
+                </div>
+                <div id="finderResultGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            </div>
+        </div>
+
+        <!-- ================= AUTHOR & SELLER PORTAL VIEW ================= -->
+        <div id="view-sell" class="view-section hidden max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+            <div class="text-center space-y-3">
+                <div class="inline-flex items-center gap-2 bg-bookslate-900 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest">
+                    <i class="fa-solid fa-store text-amber-400"></i> Author & Independent Bookstore Portal
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black font-serif text-bookslate-900">List Your Book on BookBridge</h1>
+                <p class="text-slate-600 text-sm sm:text-base max-w-xl mx-auto">Publish your book to our marketplace instantly in real-time.</p>
+            </div>
+
+            <div class="bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-xl">
+                <form id="sellBookForm" onsubmit="handlePublishBook(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Book Title *</label>
+                            <input type="text" id="sellTitle" required placeholder="e.g. The Architecture of Algorithms" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-600">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Author Name *</label>
+                            <input type="text" id="sellAuthor" required placeholder="e.g. Dr. K. Venkatraman" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-600">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Category *</label>
+                            <select id="sellCategory" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-600">
+                                <option value="Fiction">Fiction</option>
+                                <option value="Educational">Educational</option>
+                                <option value="Children">Children's</option>
+                                <option value="Tamil Books">Tamil Books</option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Price (₹) *</label>
+                            <input type="number" id="sellPrice" required min="50" max="5000" placeholder="450" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-600">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Cover Image URL *</label>
+                            <input type="url" id="sellImage" required placeholder="https://images.unsplash.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-600">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Synopsis / Description *</label>
+                        <textarea id="sellDesc" required rows="4" placeholder="Provide a compelling summary to attract readers..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm focus:outline-none focus:border-amber-600"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-bookslate-900 hover:bg-bookslate-800 text-white font-extrabold py-4 rounded-2xl shadow-xl transition-all text-base flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-cloud-arrow-up text-amber-400"></i> Publish Book Instantly
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Cart Drawer -->
+    <div id="cartDrawer" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex justify-end transition-opacity">
+        <div class="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between transform translate-x-full transition-transform duration-300" id="cartDrawerPanel">
+            <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-bookslate-50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-800 rounded-xl flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold font-serif text-bookslate-900 text-lg">Your Shopping Cart</h2>
+                        <p class="text-xs text-slate-500" id="cartItemCountHeader">0 items selected</p>
+                    </div>
+                </div>
+                <button onclick="closeCartDrawer()" class="p-2 rounded-xl hover:bg-slate-200 text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+            <div class="p-6 border-t border-slate-200 bg-bookslate-50 space-y-4">
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between text-slate-600"><span>Subtotal</span><span id="cartSubtotal" class="font-bold text-bookslate-900">₹0</span></div>
+                    <div class="flex justify-between text-slate-600"><span>Promo Discount (<span id="promoCodeLabel">None</span>)</span><span id="cartDiscount" class="font-bold text-emerald-600">-₹0</span></div>
+                    <div class="flex justify-between text-slate-600"><span>Estimated Shipping</span><span id="cartShipping" class="font-bold text-bookslate-900">₹50</span></div>
+                    <div class="flex justify-between text-base font-black text-bookslate-900 pt-2 border-t border-slate-200"><span>Total Amount</span><span id="cartTotal" class="text-amber-600">₹0</span></div>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="promoInput" placeholder="Enter promo code (e.g. BRIDGE20)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs uppercase font-bold focus:outline-none focus:border-amber-600">
+                    <button onclick="applyPromoCode()" class="bg-bookslate-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-bookslate-800 transition-all">Apply</button>
+                </div>
+                <button onclick="openCheckoutModal()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-extrabold py-3.5 rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-lock text-xs"></i> Proceed to Secure Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wishlist Modal -->
+    <div id="wishlistModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                <h2 class="text-xl font-black font-serif text-bookslate-900 flex items-center gap-2"><i class="fa-solid fa-heart text-rose-500"></i> Saved Wishlist Items</h2>
+                <button onclick="closeWishlistModal()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="wishlistModalItems" class="flex-1 overflow-y-auto space-y-4 max-h-[60vh]"></div>
+        </div>
+    </div>
+
+    <!-- Book Details Modal -->
+    <div id="bookDetailModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto" id="bookDetailContent"></div>
+    </div>
+
+    <!-- Simulated Checkout Success Modal -->
+    <div id="checkoutModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl relative">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto text-3xl shadow-inner"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="space-y-2">
+                <h2 class="text-2xl font-black font-serif text-bookslate-900">Order Placed Successfully!</h2>
+                <p class="text-xs text-slate-500" id="orderIdText">Order ID: #BB-89241</p>
+                <p class="text-sm text-slate-600 pt-2">Thank you for supporting authors and independent booksellers on BookBridge.</p>
+            </div>
+            <button onclick="finalizeOrder()" class="w-full bg-bookslate-900 hover:bg-bookslate-800 text-white font-extrabold py-3.5 rounded-xl shadow-lg transition-all text-sm">Continue Exploring</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-3 pointer-events-none"></div>
+
+    <footer class="bg-bookslate-900 text-slate-400 py-16 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
+            <p>&copy; 2026 BookBridge E-Commerce Platform. All rights reserved. (39 Curated Titles)</p>
+        </div>
+    </footer>
+
+    <script>
+        // Expanded Rich Dataset of 39 Books
+        let booksDatabase = [
+            {
+                id: 'book-tamil-1',
+                title: 'Ponniyin Selvan (Part 1 - Pudhu Vellam)',
+                author: 'Kalki Krishnamurthy',
+                category: 'Tamil Books',
+                price: 450,
+                originalPrice: 600,
+                rating: 4.9,
+                reviewsCount: 1420,
+                image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop',
+                description: 'The immortal Chola historical epic novel by Kalki. Dive into the intrigues, valor, and political maneuvers during the golden age of Rajaraja Chola.',
+                badge: 'Tamil Classic'
+            },
+            {
+                id: 'book-tamil-2',
+                title: 'Thirukkural with Explanation (திருக்குறள்)',
+                author: 'Thiruvalluvar',
+                category: 'Tamil Books',
+                price: 299,
+                originalPrice: 400,
+                rating: 5.0,
+                reviewsCount: 2300,
+                image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=600&auto=format&fit=crop',
+                description: 'A masterpiece of Tamil literature consisting of 1,330 couplets covering ethics, wealth, and love. Essential reading for every household.',
+                badge: 'Heritage'
+            },
+            {
+                id: 'book-tamil-3',
+                title: 'Parthiban Kanavu (The Dream of Parthiban)',
+                author: 'Kalki Krishnamurthy',
+                category: 'Tamil Books',
+                price: 350,
+                originalPrice: 480,
+                rating: 4.8,
+                reviewsCount: 890,
+                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600&auto=format&fit=crop',
+                description: 'A riveting historical romance novel depicting the aspirations of Pallava king Vikrama Cholan and Prince Mahendravarman.',
+                badge: 'Bestseller'
+            },
+            {
+                id: 'book-fic-1',
+                title: 'The Midnight Library',
+                author: 'Matt Haig',
+                category: 'Fiction',
+                price: 520,
+                originalPrice: 699,
+                rating: 4.7,
+                reviewsCount: 3100,
+                image: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=600&auto=format&fit=crop',
+                description: 'Between life and death there is a library, and within that library, the shelves go on forever. Every book provides a chance to try another life.',
+                badge: 'Global Bestseller'
+            },
+            {
+                id: 'book-fic-2',
+                title: 'The Alchemist',
+                author: 'Paulo Coelho',
+                category: 'Fiction',
+                price: 399,
+                originalPrice: 499,
+                rating: 4.8,
+                reviewsCount: 5400,
+                image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=600&auto=format&fit=crop',
+                description: 'Paulo Coelho\'s masterpiece tells the mystical story of Santiago, an Andalusian shepherd boy who yearns to travel in search of treasure.',
+                badge: 'Classic'
+            },
+            {
+                id: 'book-edu-1',
+                title: 'Clean Code: A Handbook of Agile Craftsmanship',
+                author: 'Robert C. Martin',
+                category: 'Educational',
+                price: 850,
+                originalPrice: 1150,
+                rating: 4.8,
+                reviewsCount: 1890,
+                image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=600&auto=format&fit=crop',
+                description: 'Even bad code can function. But if code isn\'t clean, it can bring a development organization to its knees.',
+                badge: 'Top Tech'
+            },
+            {
+                id: 'book-edu-2',
+                title: 'Data Science & Machine Learning Masterclass',
+                author: 'Dr. R. Baskaran',
+                category: 'Educational',
+                price: 920,
+                originalPrice: 1299,
+                rating: 4.9,
+                reviewsCount: 750,
+                image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=600&auto=format&fit=crop',
+                description: 'Comprehensive guide to Python algorithms, neural networks, statistical inference, and real-world predictive modeling.',
+                badge: 'Academic'
+            },
+            {
+                id: 'book-child-1',
+                title: 'The Little Prince',
+                author: 'Antoine de Saint-Exupéry',
+                category: 'Children',
+                price: 250,
+                originalPrice: 350,
+                rating: 4.9,
+                reviewsCount: 4200,
+                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600&auto=format&fit=crop',
+                description: 'A poetic tale with watercolor illustrations in which a young prince visits various planets in space.',
+                badge: 'Masterpiece'
+            },
+            {
+                id: 'book-child-2',
+                title: 'Tales of Tamil Folklore for Kids',
+                author: 'Kavitha Ramesh',
+                category: 'Children',
+                price: 320,
+                originalPrice: 450,
+                rating: 4.7,
+                reviewsCount: 310,
+                image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop',
+                description: 'Delightful moral stories from ancient Tamil folklore specially illustrated for young readers.',
+                badge: 'New Release'
+            },
+            {
+                id: 'book-clas-1',
+                title: '1984',
+                author: 'George Orwell',
+                category: 'Fiction',
+                price: 340,
+                originalPrice: 499,
+                rating: 4.8,
+                reviewsCount: 6100,
+                image: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=600&auto=format&fit=crop',
+                description: 'A dystopian classic exploring Big Brother, mass surveillance, totalitarian regime control, and thought suppression.',
+                badge: 'Dystopian'
+            },
+            {
+                id: 'book-scifi-1',
+                title: 'Dune',
+                author: 'Frank Herbert',
+                category: 'Fiction',
+                price: 650,
+                originalPrice: 850,
+                rating: 4.9,
+                reviewsCount: 4800,
+                image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
+                description: 'Set on desert planet Arrakis, telling the story of Paul Atreides and the battle for melange spice.',
+                badge: 'Sci-Fi Epic'
+            },
+            {
+                id: 'book-clas-2',
+                title: 'Pride and Prejudice',
+                author: 'Jane Austen',
+                category: 'Fiction',
+                price: 299,
+                originalPrice: 420,
+                rating: 4.8,
+                reviewsCount: 7300,
+                image: 'https://images.unsplash.com/photo-1476275466078-4007374efbbe?q=80&w=600&auto=format&fit=crop',
+                description: 'A timeless novel of manners, courtship, and love between Elizabeth Bennet and Mr. Darcy.',
+                badge: 'Romance'
+            },
+            {
+                id: 'book-scifi-2',
+                title: 'Project Hail Mary',
+                author: 'Andy Weir',
+                category: 'Fiction',
+                price: 580,
+                originalPrice: 799,
+                rating: 4.9,
+                reviewsCount: 2900,
+                image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop',
+                description: 'A lone astronaut wakes up on an interstellar mission with amnesia and must use science to save Earth.',
+                badge: 'Sci-Fi'
+            },
+            {
+                id: 'book-clas-3',
+                title: 'To Kill a Mockingbird',
+                author: 'Harper Lee',
+                category: 'Fiction',
+                price: 380,
+                originalPrice: 500,
+                rating: 4.9,
+                reviewsCount: 8200,
+                image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=600&auto=format&fit=crop',
+                description: 'A moving story of racial injustice, empathy, and childhood innocence in the American South.',
+                badge: 'Pulitzer'
+            },
+            {
+                id: 'book-scifi-3',
+                title: 'Fahrenheit 451',
+                author: 'Ray Bradbury',
+                category: 'Fiction',
+                price: 360,
+                originalPrice: 480,
+                rating: 4.6,
+                reviewsCount: 3400,
+                image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=600&auto=format&fit=crop',
+                description: 'In a future where books are outlawed and firemen burn them, Guy Montag questions everything.',
+                badge: 'Classic'
+            },
+            {
+                id: 'book-scifi-4',
+                title: 'Neuromancer',
+                author: 'William Gibson',
+                category: 'Fiction',
+                price: 490,
+                originalPrice: 650,
+                rating: 4.5,
+                reviewsCount: 1950,
+                image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop',
+                description: 'The definitive cyberpunk novel introducing Case, a hacker hired for an AI heist in cyberspace.',
+                badge: 'Cyberpunk'
+            },
+            {
+                id: 'book-scifi-5',
+                title: 'Foundation',
+                author: 'Isaac Asimov',
+                category: 'Fiction',
+                price: 420,
+                originalPrice: 590,
+                rating: 4.7,
+                reviewsCount: 3800,
+                image: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=600&auto=format&fit=crop',
+                description: 'Mathematician Hari Seldon uses psychohistory to predict the fall of the Galactic Empire.',
+                badge: 'Sci-Fi'
+            },
+            {
+                id: 'book-bio-1',
+                title: 'Wings of Fire',
+                author: 'Dr. A.P.J. Abdul Kalam',
+                category: 'Educational',
+                price: 280,
+                originalPrice: 395,
+                rating: 4.9,
+                reviewsCount: 9400,
+                image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=600&auto=format&fit=crop',
+                description: 'The inspiring autobiography of India\'s Missile Man detailing his journey from Rameswaram to ISRO.',
+                badge: 'Biography'
+            },
+            {
+                id: 'book-bio-2',
+                title: 'Steve Jobs',
+                author: 'Walter Isaacson',
+                category: 'Educational',
+                price: 720,
+                originalPrice: 999,
+                rating: 4.8,
+                reviewsCount: 5100,
+                image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=600&auto=format&fit=crop',
+                description: 'The exclusive biography of Apple co-founder Steve Jobs based on extensive interviews.',
+                badge: 'Biography'
+            },
+            {
+                id: 'book-bio-3',
+                title: 'Long Walk to Freedom',
+                author: 'Nelson Mandela',
+                category: 'Educational',
+                price: 540,
+                originalPrice: 750,
+                rating: 4.9,
+                reviewsCount: 4100,
+                image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=600&auto=format&fit=crop',
+                description: 'The riveting autobiography chronicling Nelson Mandela\'s life, 27 years in prison, and victory over apartheid.',
+                badge: 'Memoir'
+            },
+            {
+                id: 'book-bio-4',
+                title: 'Becoming',
+                author: 'Michelle Obama',
+                category: 'Educational',
+                price: 610,
+                originalPrice: 850,
+                rating: 4.8,
+                reviewsCount: 6700,
+                image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=600&auto=format&fit=crop',
+                description: 'An intimate, powerful memoir by the former First Lady of the United States.',
+                badge: 'Bestseller'
+            },
+            {
+                id: 'book-bio-5',
+                title: 'Elon Musk',
+                author: 'Walter Isaacson',
+                category: 'Educational',
+                price: 780,
+                originalPrice: 1050,
+                rating: 4.7,
+                reviewsCount: 3200,
+                image: 'https://images.unsplash.com/photo-1516849841032-87cbac4d88f7?q=80&w=600&auto=format&fit=crop',
+                description: 'An intimate biography of the visionary innovator behind SpaceX, Tesla, and Neuralink.',
+                badge: 'New'
+            },
+            {
+                id: 'book-bio-6',
+                title: 'The Diary of a Young Girl',
+                author: 'Anne Frank',
+                category: 'Educational',
+                price: 260,
+                originalPrice: 380,
+                rating: 4.9,
+                reviewsCount: 8900,
+                image: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?q=80&w=600&auto=format&fit=crop',
+                description: 'The poignant personal diary of Anne Frank hiding from Nazi persecution in an Amsterdam annex.',
+                badge: 'Historical'
+            },
+            {
+                id: 'book-edu-3',
+                title: 'Sapiens: A Brief History of Humankind',
+                author: 'Yuval Noah Harari',
+                category: 'Educational',
+                price: 499,
+                originalPrice: 699,
+                rating: 4.8,
+                reviewsCount: 9100,
+                image: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=600&auto=format&fit=crop',
+                description: 'Exploring how Homo sapiens conquered Earth through cognitive revolutions and scientific advances.',
+                badge: 'Non-Fiction'
+            },
+            {
+                id: 'book-edu-4',
+                title: 'Atomic Habits',
+                author: 'James Clear',
+                category: 'Educational',
+                price: 470,
+                originalPrice: 650,
+                rating: 4.9,
+                reviewsCount: 12400,
+                image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=600&auto=format&fit=crop',
+                description: 'An easy, proven framework for building good habits and mastering tiny behaviors.',
+                badge: 'Self-Help'
+            },
+            {
+                id: 'book-edu-5',
+                title: 'Designing Data-Intensive Applications',
+                author: 'Martin Kleppmann',
+                category: 'Educational',
+                price: 980,
+                originalPrice: 1350,
+                rating: 4.9,
+                reviewsCount: 2100,
+                image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop',
+                description: 'The definitive guide to distributed systems architecture, storage engines, and replication.',
+                badge: 'Tech'
+            },
+            {
+                id: 'book-edu-6',
+                title: 'Thinking, Fast and Slow',
+                author: 'Daniel Kahneman',
+                category: 'Educational',
+                price: 440,
+                originalPrice: 599,
+                rating: 4.7,
+                reviewsCount: 5600,
+                image: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=600&auto=format&fit=crop',
+                description: 'Explaining the two systems driving how we think: fast intuitive System 1 and slow logical System 2.',
+                badge: 'Psychology'
+            },
+            {
+                id: 'book-edu-7',
+                title: 'Structure & Interpretation of Computer Programs',
+                author: 'Harold Abelson & Gerald Sussman',
+                category: 'Educational',
+                price: 890,
+                originalPrice: 1200,
+                rating: 4.9,
+                reviewsCount: 1100,
+                image: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?q=80&w=600&auto=format&fit=crop',
+                description: 'The classic MIT computer science textbook exploring procedural and metalinguistic abstraction.',
+                badge: 'CS Classic'
+            },
+            {
+                id: 'book-edu-8',
+                title: 'The Pragmatic Programmer',
+                author: 'David Thomas & Andrew Hunt',
+                category: 'Educational',
+                price: 810,
+                originalPrice: 1100,
+                rating: 4.8,
+                reviewsCount: 2300,
+                image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=600&auto=format&fit=crop',
+                description: 'Essential software engineering insights covering code craftsmanship and architectural principles.',
+                badge: 'Coding'
+            },
+            {
+                id: 'book-tamil-4',
+                title: 'Sivagamiyin Sabatham (Part 1)',
+                author: 'Kalki Krishnamurthy',
+                category: 'Tamil Books',
+                price: 420,
+                originalPrice: 580,
+                rating: 4.9,
+                reviewsCount: 1650,
+                image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop',
+                description: 'Set during the Pallava dynasty era, recounting the epic saga of Mahendravarman and dancer Sivagami.',
+                badge: 'Tamil Epic'
+            },
+            {
+                id: 'book-tamil-5',
+                title: 'Ponniyin Selvan (Part 2 - Chuzharkatru)',
+                author: 'Kalki Krishnamurthy',
+                category: 'Tamil Books',
+                price: 450,
+                originalPrice: 600,
+                rating: 4.9,
+                reviewsCount: 1280,
+                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600&auto=format&fit=crop',
+                description: 'The second volume following Vandiyathevan\'s daring journey to Sri Lanka.',
+                badge: 'Tamil Classic'
+            },
+            {
+                id: 'book-tamil-6',
+                title: 'Silappatikaram',
+                author: 'Ilango Adigal',
+                category: 'Tamil Books',
+                price: 380,
+                originalPrice: 520,
+                rating: 4.8,
+                reviewsCount: 940,
+                image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=600&auto=format&fit=crop',
+                description: 'One of the Five Great Epics of Tamil literature detailing Kannagi and Kovalan.',
+                badge: 'Sangam'
+            },
+            {
+                id: 'book-tamil-7',
+                title: 'Velpari (Part 1)',
+                author: 'Su. Venkatesan',
+                category: 'Tamil Books',
+                price: 550,
+                originalPrice: 700,
+                rating: 5.0,
+                reviewsCount: 2100,
+                image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop',
+                description: 'Sahitya Akademi awardee Su. Venkatesan\'s modern Tamil epic about King Pari and nature conservation.',
+                badge: 'Modern Epic'
+            },
+            {
+                id: 'book-tamil-8',
+                title: 'Manimekalai',
+                author: 'Seethalai Sathanar',
+                category: 'Tamil Books',
+                price: 340,
+                originalPrice: 460,
+                rating: 4.7,
+                reviewsCount: 620,
+                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600&auto=format&fit=crop',
+                description: 'The sequel to Silappatikaram detailing Manimekalai\'s spiritual journey and Buddhist philosophy.',
+                badge: 'Ancient'
+            },
+            {
+                id: 'book-child-3',
+                title: 'Harry Potter and the Sorcerer\'s Stone',
+                author: 'J.K. Rowling',
+                category: 'Children',
+                price: 499,
+                originalPrice: 699,
+                rating: 4.9,
+                reviewsCount: 14500,
+                image: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=600&auto=format&fit=crop',
+                description: 'An orphan discovers he is a wizard and begins his first year at Hogwarts School of Witchcraft and Wizardry.',
+                badge: 'Fantasy'
+            },
+            {
+                id: 'book-child-4',
+                title: 'Charlotte\'s Web',
+                author: 'E.B. White',
+                category: 'Children',
+                price: 280,
+                originalPrice: 399,
+                rating: 4.8,
+                reviewsCount: 3400,
+                image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600&auto=format&fit=crop',
+                description: 'The heartwarming story of a pig named Wilbur and his friendship with a clever spider named Charlotte.',
+                badge: 'Children\'s'
+            },
+            {
+                id: 'book-child-5',
+                title: 'Matilda',
+                author: 'Roald Dahl',
+                category: 'Children',
+                price: 310,
+                originalPrice: 420,
+                rating: 4.8,
+                reviewsCount: 5200,
+                image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop',
+                description: 'A gifted young girl with telekinesis stands up to her parents and the tyrannical headmistress.',
+                badge: 'Bestseller'
+            },
+            {
+                id: 'book-child-6',
+                title: 'Panchatantra Moral Stories',
+                author: 'Vishnu Sharma',
+                category: 'Children',
+                price: 220,
+                originalPrice: 320,
+                rating: 4.9,
+                reviewsCount: 1800,
+                image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=600&auto=format&fit=crop',
+                description: 'Classic animal fables designed to teach young minds practical wisdom and moral values.',
+                badge: 'Moral'
+            },
+            {
+                id: 'book-fic-3',
+                title: 'The Great Gatsby',
+                author: 'F. Scott Fitzgerald',
+                category: 'Fiction',
+                price: 310,
+                originalPrice: 450,
+                rating: 4.7,
+                reviewsCount: 6800,
+                image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=600&auto=format&fit=crop',
+                description: 'Set in the Roaring Twenties, exploring wealth, obsession, and the pursuit of the American Dream.',
+                badge: 'Classic'
+            },
+            {
+                id: 'book-fic-4',
+                title: 'Klara and the Sun',
+                author: 'Kazuo Ishiguro',
+                category: 'Fiction',
+                price: 540,
+                originalPrice: 720,
+                rating: 4.6,
+                reviewsCount: 2200,
+                image: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=600&auto=format&fit=crop',
+                description: 'A novel told from the perspective of Klara, an Artificial Friend with outstanding observational qualities.',
+                badge: 'Literary'
+            },
+            {
+                id: 'book-fic-5',
+                title: 'Life of Pi',
+                author: 'Yann Martel',
+                category: 'Fiction',
+                price: 430,
+                originalPrice: 599,
+                rating: 4.8,
+                reviewsCount: 4900,
+                image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
+                description: 'A 16-year-old boy survives 227 days on a lifeboat in the Pacific Ocean with a Bengal tiger.',
+                badge: 'Booker'
+            }
+        ];
+
+        let cart = JSON.parse(localStorage.getItem('bookbridge_cart')) || [];
+        let wishlist = JSON.parse(localStorage.getItem('bookbridge_wishlist')) || [];
+        let currentFilter = 'All';
+        let currentMaxPrice = 1500;
+        let currentSort = 'featured';
+        let currentPromoDiscount = 0;
+        let activePromoCodeName = null;
+        let finderState = { genre: 'Fiction', budget: 600 };
+
+        window.onload = function() {
+            renderHomeFeatured();
+            renderCatalog();
+            updateCounters();
+            updateCategoryCounts();
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-' + tabId).classList.remove('hidden');
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('bg-white', 'shadow-sm', 'text-amber-600', 'font-bold'));
+            document.querySelectorAll(`[data-tab="${tabId}"]`).forEach(el => el.classList.add('bg-white', 'shadow-sm', 'text-amber-600', 'font-bold'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-bookslate-900 text-white border-amber-500/40' : 'bg-rose-600 text-white';
+            const icon = type === 'success' ? 'fa-circle-check text-amber-400' : 'fa-circle-exclamation';
+            toast.className = `${bgColor} px-5 py-3.5 rounded-2xl shadow-2xl border flex items-center gap-3 text-sm font-semibold pointer-events-auto fade-in transition-all`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function renderHomeFeatured() {
+            const grid = document.getElementById('homeFeaturedGrid');
+            grid.innerHTML = booksDatabase.slice(0, 4).map(book => createBookCardHTML(book)).join('');
+        }
+
+        function createBookCardHTML(book) {
+            const isWishlisted = wishlist.some(item => item.id === book.id);
+            const heartClass = isWishlisted ? 'fa-solid text-rose-500' : 'fa-regular text-slate-400';
+            const discountPercent = Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100);
+            return `
+                <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden group">
+                    <div class="relative aspect-[4/5] bg-slate-100 overflow-hidden cursor-pointer" onclick="openBookDetail('${book.id}')">
+                        <img src="${book.image}" alt="${book.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/400x500/1e293b/ffffff?text=BookBridge'">
+                        <div class="absolute top-3 left-3 flex flex-col gap-1">
+                            ${book.badge ? `<span class="bg-amber-500 text-bookslate-900 font-extrabold text-[10px] px-2.5 py-1 rounded-lg shadow-md">${book.badge}</span>` : ''}
+                            <span class="bg-bookslate-900/80 backdrop-blur-md text-amber-300 font-bold text-[10px] px-2.5 py-1 rounded-lg">-${discountPercent}%</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); toggleWishlist('${book.id}')" class="absolute top-3 right-3 w-9 h-9 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform">
+                            <i class="${heartClass} text-base"></i>
+                        </button>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-1.5 cursor-pointer" onclick="openBookDetail('${book.id}')">
+                            <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">${book.category}</span>
+                            <h3 class="font-bold text-bookslate-900 text-base line-clamp-1 group-hover:text-amber-600 transition-colors">${book.title}</h3>
+                            <p class="text-xs text-slate-500 font-medium">By ${book.author}</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                            <div>
+                                <span class="text-lg font-black text-bookslate-900">₹${book.price}</span>
+                                <span class="text-xs text-slate-400 line-through ml-1">₹${book.originalPrice}</span>
+                            </div>
+                            <button onclick="addToCart('${book.id}')" class="bg-bookslate-900 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+                                <i class="fa-solid fa-cart-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCatalog() {
+            const grid = document.getElementById('catalogGrid');
+            const noResults = document.getElementById('noResults');
+            let filtered = booksDatabase.filter(book => {
+                const matchCat = currentFilter === 'All' || book.category === currentFilter;
+                const matchPrice = book.price <= currentMaxPrice;
+                return matchCat && matchPrice;
+            });
+            if (currentSort === 'price-low') filtered.sort((a,b) => a.price - b.price);
+            if (currentSort === 'price-high') filtered.sort((a,b) => b.price - a.price);
+            if (currentSort === 'rating') filtered.sort((a,b) => b.rating - a.rating);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                grid.innerHTML = filtered.map(book => createBookCardHTML(book)).join('');
+            }
+            updateCategoryCounts();
+        }
+
+        function filterCatalog(category) {
+            currentFilter = category;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('bg-amber-100', 'text-amber-900', 'font-bold'));
+            const activeBtn = document.querySelector(`[data-cat="${category}"]`);
+            if (activeBtn) activeBtn.classList.add('bg-amber-100', 'text-amber-900', 'font-bold');
+            renderCatalog();
+        }
+
+        function handlePriceFilter(val) {
+            currentMaxPrice = parseInt(val);
+            document.getElementById('priceOutput').innerText = '₹' + val;
+            renderCatalog();
+        }
+
+        function handleSortChange(val) {
+            currentSort = val;
+            renderCatalog();
+        }
+
+        function resetFilters() {
+            currentFilter = 'All';
+            currentMaxPrice = 1500;
+            currentSort = 'featured';
+            document.getElementById('priceRange').value = 1500;
+            document.getElementById('priceOutput').innerText = '₹1500';
+            document.getElementById('sortSelect').value = 'featured';
+            filterCatalog('All');
+        }
+
+        function updateCategoryCounts() {
+            document.getElementById('count-all').innerText = booksDatabase.length;
+            document.getElementById('count-fiction').innerText = booksDatabase.filter(b => b.category === 'Fiction').length;
+            document.getElementById('count-educational').innerText = booksDatabase.filter(b => b.category === 'Educational').length;
+            document.getElementById('count-children').innerText = booksDatabase.filter(b => b.category === 'Children').length;
+            document.getElementById('count-tamil').innerText = booksDatabase.filter(b => b.category === 'Tamil Books').length;
+        }
+
+        function addToCart(bookId) {
+            const book = booksDatabase.find(b => b.id === bookId);
+            if (!book) return;
+            const existing = cart.find(item => item.id === bookId);
+            if (existing) { existing.quantity += 1; } else { cart.push({ ...book, quantity: 1 }); }
+            saveCart();
+            updateCounters();
+            showToast(`Added "${book.title}" to cart successfully!`, 'success');
+        }
+
+        function quickAdd(bookId) {
+            addToCart(bookId);
+            openCartDrawer();
+        }
+
+        function updateCartQuantity(bookId, delta) {
+            const item = cart.find(i => i.id === bookId);
+            if (!item) return;
+            item.quantity += delta;
+            if (item.quantity <= 0) cart = cart.filter(i => i.id !== bookId);
+            saveCart();
+            renderCartItems();
+            updateCounters();
+        }
+
+        function removeCartItem(bookId) {
+            cart = cart.filter(i => i.id !== bookId);
+            saveCart();
+            renderCartItems();
+            updateCounters();
+            showToast('Item removed from cart.', 'success');
+        }
+
+        function saveCart() { localStorage.setItem('bookbridge_cart', JSON.stringify(cart)); }
+        function saveWishlist() { localStorage.setItem('bookbridge_wishlist', JSON.stringify(wishlist)); }
+
+        function updateCounters() {
+            const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const cartBadge = document.getElementById('cartBadge');
+            cartBadge.innerText = totalCartItems;
+            if (totalCartItems > 0) cartBadge.classList.remove('hidden'); else cartBadge.classList.add('hidden');
+            const wishlistBadge = document.getElementById('wishlistBadge');
+            wishlistBadge.innerText = wishlist.length;
+            if (wishlist.length > 0) wishlistBadge.classList.remove('hidden'); else wishlistBadge.classList.add('hidden');
+        }
+
+        function openCartDrawer() {
+            document.getElementById('cartDrawer').classList.remove('hidden');
+            setTimeout(() => document.getElementById('cartDrawerPanel').classList.remove('translate-x-full'), 10);
+            renderCartItems();
+        }
+
+        function closeCartDrawer() {
+            document.getElementById('cartDrawerPanel').classList.add('translate-x-full');
+            setTimeout(() => document.getElementById('cartDrawer').classList.add('hidden'), 300);
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cartItemsContainer');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartItemCountHeader').innerText = `${totalItems} items selected`;
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="text-center py-16 space-y-3"><i class="fa-solid fa-bag-shopping text-4xl text-slate-300"></i><h4 class="font-bold text-bookslate-900">Your cart is empty</h4></div>`;
+            } else {
+                container.innerHTML = cart.map(item => `
+                    <div class="flex gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <img src="${item.image}" class="w-16 h-20 object-cover rounded-xl shadow" onerror="this.src='https://placehold.co/200x250/1e293b/ffffff?text=Book'">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-bookslate-900 text-sm line-clamp-1">${item.title}</h4>
+                            <p class="text-xs text-slate-500">${item.author}</p>
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="font-bold text-amber-700 text-sm">₹${item.price}</span>
+                                <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2 py-1 shadow-sm">
+                                    <button onclick="updateCartQuantity('${item.id}', -1)" class="text-slate-500 hover:text-amber-600 px-1 font-bold">-</button>
+                                    <span class="text-xs font-bold w-4 text-center">${item.quantity}</span>
+                                    <button onclick="updateCartQuantity('${item.id}', 1)" class="text-slate-500 hover:text-amber-600 px-1 font-bold">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="removeCartItem('${item.id}')" class="text-slate-400 hover:text-rose-600 p-2"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                    </div>
+                `).join('');
+            }
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const discountAmount = Math.round(subtotal * currentPromoDiscount);
+            const shipping = subtotal > 750 || subtotal === 0 ? 0 : 50;
+            const finalTotal = subtotal - discountAmount + shipping;
+            document.getElementById('cartSubtotal').innerText = '₹' + subtotal;
+            document.getElementById('cartDiscount').innerText = '-₹' + discountAmount;
+            document.getElementById('cartShipping').innerText = shipping === 0 ? 'FREE' : '₹' + shipping;
+            document.getElementById('cartTotal').innerText = '₹' + finalTotal;
+        }
+
+        function applyPromoCode() {
+            const code = document.getElementById('promoInput').value.trim().toUpperCase();
+            if (code === 'BRIDGE20') {
+                currentPromoDiscount = 0.20;
+                activePromoCodeName = 'BRIDGE20 (20% OFF)';
+                document.getElementById('promoCodeLabel').innerText = activePromoCodeName;
+                showToast('Promo code BRIDGE20 applied successfully!', 'success');
+                renderCartItems();
+            } else {
+                showToast('Invalid or expired promo code.', 'error');
+            }
+        }
+
+        function toggleWishlist(bookId) {
+            const book = booksDatabase.find(b => b.id === bookId);
+            if (!book) return;
+            const index = wishlist.findIndex(item => item.id === bookId);
+            if (index > -1) { wishlist.splice(index, 1); showToast('Removed from wishlist.', 'success'); }
+            else { wishlist.push(book); showToast('Saved to wishlist!', 'success'); }
+            saveWishlist();
+            updateCounters();
+            renderCatalog();
+            renderHomeFeatured();
+        }
+
+        function openWishlistModal() {
+            const modal = document.getElementById('wishlistModal');
+            const container = document.getElementById('wishlistModalItems');
+            modal.classList.remove('hidden');
+            if (wishlist.length === 0) {
+                container.innerHTML = `<div class="text-center py-12 text-slate-500 text-sm">Your wishlist is empty.</div>`;
+            } else {
+                container.innerHTML = wishlist.map(item => `
+                    <div class="flex gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <img src="${item.image}" class="w-16 h-20 object-cover rounded-xl shadow">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-bookslate-900 text-sm">${item.title}</h4>
+                            <p class="text-xs text-slate-500">By ${item.author}</p>
+                            <span class="font-bold text-amber-700 text-sm mt-1 block">₹${item.price}</span>
+                        </div>
+                        <button onclick="addToCart('${item.id}'); closeWishlistModal(); openCartDrawer();" class="bg-amber-600 text-white px-3 py-2 rounded-xl text-xs font-bold">Move to Cart</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function closeWishlistModal() { document.getElementById('wishlistModal').classList.add('hidden'); }
+
+        function openBookDetail(bookId) {
+            const book = booksDatabase.find(b => b.id === bookId);
+            if (!book) return;
+            const modal = document.getElementById('bookDetailModal');
+            const content = document.getElementById('bookDetailContent');
+            content.innerHTML = `
+                <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                    <span class="text-xs font-bold text-amber-600 uppercase tracking-widest">${book.category}</span>
+                    <button onclick="closeBookDetailModal()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
+                    <div class="aspect-[4/5] rounded-2xl overflow-hidden shadow-xl bg-slate-100">
+                        <img src="${book.image}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="space-y-4">
+                        <h2 class="text-2xl font-black font-serif text-bookslate-900">${book.title}</h2>
+                        <p class="text-sm font-semibold text-slate-600">Author: <span class="text-amber-700">${book.author}</span></p>
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">${book.description}</p>
+                        <div class="text-2xl font-black text-bookslate-900">₹${book.price} <span class="text-sm text-slate-400 line-through ml-2">₹${book.originalPrice}</span></div>
+                        <button onclick="addToCart('${book.id}'); closeBookDetailModal(); openCartDrawer();" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-extrabold py-3.5 rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function closeBookDetailModal() { document.getElementById('bookDetailModal').classList.add('hidden'); }
+
+        function setFinderParam(param, val) {
+            finderState[param] = val;
+            if (param === 'genre') {
+                document.querySelectorAll('.finder-genre-btn').forEach(btn => btn.classList.remove('border-amber-600', 'bg-amber-50'));
+                const target = document.querySelector(`[data-genre="${val}"]`);
+                if (target) target.classList.add('border-amber-600', 'bg-amber-50');
+            } else if (param === 'budget') {
+                document.querySelectorAll('.finder-budget-btn').forEach(btn => btn.classList.remove('border-amber-600', 'bg-amber-50'));
+                const target = document.querySelector(`[data-budget="${val}"]`);
+                if (target) target.classList.add('border-amber-600', 'bg-amber-50');
+            }
+        }
+
+        function runSmartFinder() {
+            const results = booksDatabase.filter(book => book.category === finderState.genre && book.price <= finderState.budget);
+            const area = document.getElementById('finderResultsArea');
+            const grid = document.getElementById('finderResultGrid');
+            area.classList.remove('hidden');
+
+            if (results.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 text-center py-10 bg-white rounded-3xl border border-slate-200 text-slate-500 text-sm">No exact matches found for this budget. Try increasing your budget setting.</div>`;
+            } else {
+                grid.innerHTML = results.map(book => `
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex gap-4 items-center">
+                        <img src="${book.image}" class="w-24 h-32 object-cover rounded-2xl shadow-md">
+                        <div class="space-y-2 flex-1">
+                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase">AI Recommendation</span>
+                            <h4 class="font-bold text-bookslate-900 text-base">${book.title}</h4>
+                            <p class="text-xs text-slate-500">By ${book.author}</p>
+                            <div class="flex items-center justify-between pt-2">
+                                <span class="font-bold text-amber-700 text-lg">₹${book.price}</span>
+                                <button onclick="addToCart('${book.id}'); openCartDrawer();" class="bg-bookslate-900 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md">Add to Cart</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            area.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetFinder() { document.getElementById('finderResultsArea').classList.add('hidden'); }
+
+        function handlePublishBook(e) {
+            e.preventDefault();
+            const title = document.getElementById('sellTitle').value;
+            const author = document.getElementById('sellAuthor').value;
+            const category = document.getElementById('sellCategory').value;
+            const price = parseInt(document.getElementById('sellPrice').value);
+            const image = document.getElementById('sellImage').value;
+            const description = document.getElementById('sellDesc').value;
+
+            const newBook = {
+                id: 'book-custom-' + Date.now(),
+                title, author, category, price,
+                originalPrice: Math.round(price * 1.3),
+                rating: 5.0, reviewsCount: 1, image, description,
+                badge: 'Author Direct'
+            };
+
+            booksDatabase.unshift(newBook);
+            renderCatalog();
+            renderHomeFeatured();
+            updateCategoryCounts();
+            document.getElementById('sellBookForm').reset();
+            showToast('Your book has been published to BookBridge successfully!', 'success');
+            switchTab('catalog');
+            filterCatalog(category);
+        }
+
+        function openCheckoutModal() {
+            if (cart.length === 0) { showToast('Your cart is empty.', 'error'); return; }
+            closeCartDrawer();
+            document.getElementById('orderIdText').innerText = `Order ID: #BB-${Math.floor(10000 + Math.random() * 90000)}`;
+            document.getElementById('checkoutModal').classList.remove('hidden');
+        }
+
+        function finalizeOrder() {
+            document.getElementById('checkoutModal').classList.add('hidden');
+            cart = [];
+            saveCart();
+            updateCounters();
+            switchTab('home');
+            showToast('Order confirmed! Thank you for shopping with BookBridge.', 'success');
+        }
+
+        function handleSearchInput(e) {
+            const query = e.target.value.toLowerCase().trim();
+            const suggestionsBox = document.getElementById('searchSuggestions');
+            if (query.length === 0) { suggestionsBox.classList.add('hidden'); return; }
+            const matches = booksDatabase.filter(b => 
+                b.title.toLowerCase().includes(query) || 
+                b.author.toLowerCase().includes(query) ||
+                b.category.toLowerCase().includes(query)
+            ).slice(0, 5);
+
+            if (matches.length === 0) {
+                suggestionsBox.innerHTML = `<div class="p-3 text-xs text-slate-500">No books found matching "${query}"</div>`;
+            } else {
+                suggestionsBox.innerHTML = matches.map(book => `
+                    <div onclick="openBookDetail('${book.id}'); document.getElementById('searchSuggestions').classList.add('hidden');" class="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-xl cursor-pointer transition-all">
+                        <img src="${book.image}" class="w-10 h-12 object-cover rounded-lg">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-bold text-bookslate-900 truncate">${book.title}</h4>
+                            <p class="text-[10px] text-slate-500">${book.author}</p>
+                        </div>
+                        <span class="text-xs font-bold text-amber-700">₹${book.price}</span>
+                    </div>
+                `).join('');
+            }
+            suggestionsBox.classList.remove('hidden');
+        }
+
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('#mainSearchInput') && !e.target.closest('#searchSuggestions')) {
+                const box = document.getElementById('searchSuggestions');
+                if (box) box.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
